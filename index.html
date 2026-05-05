@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Tradable</title>
+
+<!-- PWA: makes it installable as a home screen app -->
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Tradable"/>
+<meta name="application-name" content="Tradable"/>
+<meta name="theme-color" content="#0f1117"/>
+<meta name="description" content="Confluence-based currency trading analysis dashboard"/>
+
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#1a1d27;--bg3:#22263a;--bg4:#2a2f45;
+  --border:#2e3350;--border2:#3d4466;
+  --text:#e8eaf0;--text2:#9094b0;--text3:#5c6080;
+  --bull:#4ade80;--bull-bg:#0d2918;--bull-border:#1a4d2e;
+  --bear:#f87171;--bear-bg:#2d1010;--bear-border:#5a1f1f;
+  --warn:#fbbf24;--warn-bg:#2d2008;--warn-border:#5a3f0a;
+  --info:#60a5fa;--info-bg:#0d1f35;--info-border:#1a3a5c;
+  --neu:#888780;
+  --radius:8px;--radius-lg:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+.container{max-width:860px;margin:0 auto;padding:2rem 1.5rem;padding-top:calc(2rem + env(safe-area-inset-top));padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
+header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--border)}
+.logo{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem}
+h1{font-size:26px;font-weight:600;color:var(--text);margin-bottom:0.25rem}
+.subtitle{font-size:13px;color:var(--text2)}
+.section{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.125rem 1.25rem;margin-bottom:1rem}
+.section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.875rem;padding-bottom:0.625rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:8px}
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--info-bg);color:var(--info);font-size:10px;font-weight:600;cursor:pointer;border:0.5px solid var(--info-border);flex-shrink:0;transition:opacity 0.15s}
+.info-btn:hover{opacity:0.75}
+.guide-panel{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:0.875rem 1rem;margin-bottom:0.875rem;display:none}
+.guide-panel.open{display:block}
+.guide-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.guide-def{font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.guide-look-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px}
+.guide-look{font-size:12px;color:var(--text2);line-height:1.6}
+.guide-row{display:flex;gap:8px;margin-bottom:5px;align-items:flex-start}
+.guide-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-bull{background:var(--bull)}
+.dot-bear{background:var(--bear)}
+.dot-warn{background:var(--warn)}
+.dot-neu{background:var(--neu)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:500;color:var(--text2)}
+.field select,.field input{font-size:13px;padding:7px 10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);width:100%;outline:none;transition:border-color 0.15s}
+.field select:focus,.field input:focus{border-color:var(--info)}
+.btn-analyse{width:100%;margin-top:0.75rem;padding:11px;border-radius:var(--radius);border:0.5px solid var(--info-border);background:var(--info-bg);color:var(--info);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-analyse:hover{background:#132840;border-color:var(--info)}
+.result-card{border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem;border:0.5px solid var(--border)}
+.result-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px}
+.result-title{font-size:24px;font-weight:600;margin-bottom:0.5rem}
+.result-sub{font-size:13px;line-height:1.65;margin-bottom:1rem;opacity:0.8}
+.score-wrap{display:flex;align-items:center;gap:14px}
+.score-num{font-size:30px;font-weight:600}
+.score-bar-track{flex:1;background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+.score-bar-fill{height:6px;border-radius:4px;transition:width 0.4s}
+.score-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:1rem}
+.meta-card{background:rgba(255,255,255,0.04);border-radius:var(--radius);padding:0.6rem 0.75rem;border:0.5px solid var(--border)}
+.meta-label{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+.meta-val{font-size:13px;font-weight:500;color:var(--text);margin-top:2px}
+.warn-section{background:var(--warn-bg);border:0.5px solid var(--warn-border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.warn-title{font-size:11px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.625rem}
+.warn-item{font-size:13px;color:var(--warn);padding:5px 0;border-bottom:0.5px solid var(--warn-border);line-height:1.55}
+.warn-item:last-child{border-bottom:none}
+.checklist-section{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.check-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.75rem}
+.check-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.check-item:last-child{border-bottom:none}
+.check-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.c-pass{background:var(--bull-bg);color:var(--bull);border:0.5px solid var(--bull-border)}
+.c-fail{background:var(--bear-bg);color:var(--bear);border:0.5px solid var(--bear-border)}
+.c-warn{background:var(--warn-bg);color:var(--warn);border:0.5px solid var(--warn-border)}
+.c-na{background:var(--bg3);color:var(--text3);border:0.5px solid var(--border)}
+.check-label{flex:1;color:var(--text)}
+.check-val{font-size:12px;color:var(--text2)}
+.divider{height:0.5px;background:var(--border);margin:1.5rem 0}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="logo">Trading framework</div>
+  <h1>Trade Analysis Dashboard</h1>
+  <div class="subtitle">Fill in your indicator readings to receive a precise trade recommendation</div>
+</header>
+
+<div class="section">
+  <div class="section-title">Step 0A — Market type <button class="info-btn" onclick="tog('g-mkt')">?</button></div>
+  <div class="guide-panel" id="g-mkt">
+    <div class="guide-title">Market type classification</div>
+    <div class="guide-def">Before any indicator is checked, spend at least 10 minutes observing the 1-minute chart with full concentration. The market type determines which signals to act on and which to ignore.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Big player — smooth, sustained directional moves with deep, meaningful retracements. Strong conviction. Trends last days or weeks.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Scalper — rapid oscillations, surges that fade quickly, low commitment. Price reverses frequently with little follow-through.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Institutional — sudden outsized moves, event-driven, fakeouts common. Not always sustainable. Avoid chasing.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>Magnet — price drifts back toward a centre level. Surges exhaust. No conviction in either direction.</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Market type</label><select id="mktType"><option value="">— select —</option><option value="bigplayer">Big player (trending)</option><option value="scalper">Scalper</option><option value="institutional">Institutional</option><option value="magnet">Magnet / range-bound</option></select></div>
+    <div class="field"><label>Conviction present?</label><select id="conviction"><option value="">— select —</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+    <div class="field"><label>Pace of movement</label><select id="pace"><option value="">— select —</option><option value="fast">Fast (high volume)</option><option value="moderate">Moderate</option><option value="slow">Slow (low volume)</option></select></div>
+    <div class="field"><label>Fluidity of movement</label><select id="fluidity"><option value="">— select —</option><option value="smooth">Smooth (consensus)</option><option value="choppy">Choppy (no consensus)</option></select></div>
+    <div class="field"><label>Retracement behaviour</label><select id="retracement"><option value="">— select —</option><option value="deep">Deep, frequently exploited</option><option value="shallow">Shallow, rarely exploited</option><option value="none">No retracements</option></select></div>
+    <div class="field"><label>Breakout commitment</label><select id="breakoutSize"><option value="">— select —</option><option value="strong">Strong (high commitment)</option><option value="weak">Weak (low commitment)</option><option value="none">No breakouts</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Step 0B — Fundamentals <button class="info-btn" onclick="tog('g-fund')">?</button></div>
+  <div class="guide-panel" id="g-fund">
+    <div class="guide-title">Fundamental analysis</div>
+    <div class="guide-def">Currencies trade in pairs — always assess both sides. Fundamentals explain why a market type has formed. Expected rate decisions are already priced in; what moves markets is deviation from expectation.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Strong fundamentals + conviction = Big Player market. Trade with the stronger currency.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Major event upcoming — reduce position size or stand aside until after the release.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Conflicting fundamentals = no clear bias. Do not force a direction — wait for clarity.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>Write down key drivers for both currencies before every trade — this forces clarity and discipline.</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Stronger currency in pair</label><select id="fundamentals"><option value="">— select —</option><option value="base">Base currency (left)</option><option value="quote">Quote currency (right)</option><option value="neutral">Neutral / unclear</option></select></div>
+    <div class="field"><label>High-impact events upcoming?</label><select id="events"><option value="">— select —</option><option value="none">None</option><option value="minor">Minor events only</option><option value="major">Major event (NFP / CPI / rate decision)</option></select></div>
+    <div class="field"><label>Fundamental direction bias</label><select id="fundBias"><option value="">— select —</option><option value="bullish">Bullish (base currency stronger)</option><option value="bearish">Bearish (quote currency stronger)</option><option value="neutral">Neutral</option></select></div>
+    <div class="field"><label>Rate expectations already priced?</label><select id="priced"><option value="">— select —</option><option value="yes">Yes — deviation is the risk</option><option value="no">No — event not yet priced</option><option value="na">Not applicable</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Rule 1 — 50 + 200 moving averages <button class="info-btn" onclick="tog('g-ma')">?</button></div>
+  <div class="guide-panel" id="g-ma">
+    <div class="guide-title">Moving averages (50 MA + 200 MA)</div>
+    <div class="guide-def">Two simple moving averages on the daily chart. The 50 MA tracks medium-term trend; the 200 MA tracks long-term trend. Both must align before a trade is considered.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Price above BOTH MAs + 50 MA above 200 MA = strong bullish trend. Only consider buy setups.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Price below BOTH MAs + 50 MA below 200 MA = strong bearish trend. Only consider sell setups.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Price between the two MAs = conflicting signal. No trade — stand aside until price clearly breaks one way.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>MAs close together = weak trend. Wait for separation before committing.</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Price vs 50 MA</label><select id="ma50"><option value="">— select —</option><option value="above">Above</option><option value="below">Below</option><option value="at">At / crossing</option></select></div>
+    <div class="field"><label>Price vs 200 MA</label><select id="ma200"><option value="">— select —</option><option value="above">Above</option><option value="below">Below</option><option value="at">At / crossing</option></select></div>
+    <div class="field"><label>50 MA vs 200 MA</label><select id="maRelation"><option value="">— select —</option><option value="above">50 MA above 200 MA (golden cross)</option><option value="below">50 MA below 200 MA (death cross)</option><option value="crossing">Currently crossing</option></select></div>
+    <div class="field"><label>Trend strength</label><select id="trendStrength"><option value="">— select —</option><option value="strong">Strong (clear separation)</option><option value="moderate">Moderate</option><option value="weak">Weak (MAs close together)</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Rule 2 — Bollinger bands (20 / 2.0) <button class="info-btn" onclick="tog('g-bb')">?</button></div>
+  <div class="guide-panel" id="g-bb">
+    <div class="guide-title">Bollinger bands</div>
+    <div class="guide-def">Three bands around price: a 20-period moving average (middle), and upper/lower bands 2 standard deviations away. The bands expand in high volatility and contract in low volatility. The signal to use depends on the market type.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Squeeze (bands narrowing) = coiling energy, big move coming. Watch for direction — do not enter during squeeze itself.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Breakout signal (Big Player market) — daily candle closes above upper band (buy) or below lower band (sell).</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Fade signal (Scalper/Magnet market) — price touches band then closes back inside. Trade the reversal.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Price colliding into lower band in an uptrend = potential bounce. Confirm with RSI and S&R before acting.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>Price mid-range between bands = no signal. Wait for a band extreme.</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Band width</label><select id="bbWidth"><option value="">— select —</option><option value="squeezing">Squeezing (narrowing)</option><option value="narrow">Narrow (squeeze formed)</option><option value="expanding">Expanding (breakout underway)</option><option value="wide">Wide (high volatility)</option></select></div>
+    <div class="field"><label>Price location vs bands</label><select id="bbPrice"><option value="">— select —</option><option value="above_upper">Above upper band</option><option value="at_upper">At / touching upper band</option><option value="middle">Between bands (mid-range)</option><option value="at_lower">At / touching lower band</option><option value="below_lower">Below lower band</option></select></div>
+    <div class="field"><label>Bollinger signal type</label><select id="bbSignal"><option value="">— select —</option><option value="breakout_bull">Breakout — bullish (close above upper)</option><option value="breakout_bear">Breakout — bearish (close below lower)</option><option value="fade_bull">Fade — bullish (touch lower, reverse)</option><option value="fade_bear">Fade — bearish (touch upper, reverse)</option><option value="squeeze">Squeeze forming (no signal yet)</option><option value="none">No signal</option></select></div>
+    <div class="field"><label>Signal matches market type?</label><select id="bbMatch"><option value="">— select —</option><option value="yes">Yes</option><option value="no">No</option><option value="partial">Partial</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Rule 3 — RSI (14) <button class="info-btn" onclick="tog('g-rsi')">?</button></div>
+  <div class="guide-panel" id="g-rsi">
+    <div class="guide-title">Relative strength index (RSI 14)</div>
+    <div class="guide-def">An oscillator measuring momentum strength on a scale of 0–100. Above 70 = overbought. Below 30 = oversold. The key signal in this framework is divergence — when price and RSI disagree.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Bullish divergence — price makes a lower low but RSI makes a higher low. Hidden buying momentum. Strong buy signal.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Bearish divergence — price makes a higher high but RSI makes a lower high. Momentum secretly fading. Strong sell signal.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>RSI above 70 in a buy setup = overbought risk. Wait for RSI to reset toward 50.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>RSI below 30 in a sell setup = oversold risk. Bounce likely before continuation.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>RSI between 45–55 = neutral momentum. Wait for a reading to develop.</div></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="field"><label>RSI level</label><select id="rsiLevel"><option value="">— select —</option><option value="overbought">Above 70 (overbought)</option><option value="upper">50–70 (bullish zone)</option><option value="mid">45–55 (neutral)</option><option value="lower">30–50 (bearish zone)</option><option value="oversold">Below 30 (oversold)</option></select></div>
+    <div class="field"><label>RSI divergence</label><select id="rsiDiv"><option value="">— select —</option><option value="bullish">Bullish divergence</option><option value="bearish">Bearish divergence</option><option value="none">No divergence</option></select></div>
+    <div class="field"><label>RSI direction</label><select id="rsiDir"><option value="">— select —</option><option value="rising">Rising</option><option value="falling">Falling</option><option value="flat">Flat</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Rule 3 — MACD (12 / 26 / 9) <button class="info-btn" onclick="tog('g-macd')">?</button></div>
+  <div class="guide-panel" id="g-macd">
+    <div class="guide-title">MACD (moving average convergence divergence)</div>
+    <div class="guide-def">Shows the relationship between two moving averages. Consists of a histogram (bars) and a signal line (dotted). The histogram shows momentum strength. Both RSI and MACD must confirm before entry.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Histogram crossing above zero = bullish crossover signal. Strong buy confirmation when aligned with RSI and trend.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Histogram above zero and growing = strong bullish momentum building.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Histogram crossing below zero = bearish crossover signal.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Histogram above zero but shrinking = bullish momentum fading. Do not enter new longs.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Histogram below zero but shrinking = bearish momentum fading. Watch for bullish crossover.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>Flat histogram near zero = no momentum signal. Wait for a clear cross.</div></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="field"><label>MACD histogram</label><select id="macdHist"><option value="">— select —</option><option value="above_growing">Above zero, growing</option><option value="above_shrinking">Above zero, shrinking</option><option value="crossing_up">Crossing above zero</option><option value="crossing_down">Crossing below zero</option><option value="below_shrinking">Below zero, shrinking</option><option value="below_growing">Below zero, growing</option><option value="flat">Flat / no signal</option></select></div>
+    <div class="field"><label>MACD vs signal line</label><select id="macdSig"><option value="">— select —</option><option value="above">MACD above signal (bullish)</option><option value="below">MACD below signal (bearish)</option><option value="crossing_up">Crossing above (buy signal)</option><option value="crossing_down">Crossing below (sell signal)</option><option value="flat">Flat / unclear</option></select></div>
+    <div class="field"><label>RSI + MACD agree?</label><select id="momentumAgree"><option value="">— select —</option><option value="yes_bull">Yes — both bullish</option><option value="yes_bear">Yes — both bearish</option><option value="no">No — conflicting</option><option value="neutral">Both neutral</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Rule 4 — Support &amp; resistance <button class="info-btn" onclick="tog('g-sr')">?</button></div>
+  <div class="guide-panel" id="g-sr">
+    <div class="guide-title">Support &amp; resistance (key daily/weekly closes)</div>
+    <div class="guide-def">Levels defined by where price has repeatedly closed on daily and weekly charts. Only trade at hard zone extremes — never in the middle of a range.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Resistance turned support — a previously resistant level now acting as support. One of the strongest hard zone signals.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Touch and hold (Big Player market) — price touches the S&R level, confirmation candle closes back on the correct side.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>False breakout return (Institutional market) — price briefly pierces the level then closes back inside. Trade the return.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Soft zone — unstable area just beyond support/resistance. Avoid entering here.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-neu"></div><div>Mid-range — price between key levels. Do not trade here. Wait for a hard zone extreme.</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>Price location vs key S&amp;R</label><select id="srLocation"><option value="">— select —</option><option value="at_support">At support (hard zone)</option><option value="at_resistance">At resistance (hard zone)</option><option value="above_support">Above support (mid-range)</option><option value="below_resistance">Below resistance (mid-range)</option><option value="midrange">Mid-range (no clear level)</option></select></div>
+    <div class="field"><label>Zone type</label><select id="zoneType"><option value="">— select —</option><option value="hard">Hard zone (confirmed)</option><option value="soft">Soft zone (unstable)</option><option value="midrange">Mid-range</option></select></div>
+    <div class="field"><label>S&amp;R behaviour</label><select id="srBehaviour"><option value="">— select —</option><option value="touch_hold">Touch and hold (confirmation candle)</option><option value="false_break">False breakout returning inside</option><option value="clean_break">Clean break through level</option><option value="approaching">Approaching level</option></select></div>
+    <div class="field"><label>Resistance turned support?</label><select id="rts"><option value="">— select —</option><option value="yes">Yes (strong hard zone)</option><option value="no">No</option><option value="unsure">Unsure</option></select></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Exit parameters <button class="info-btn" onclick="tog('g-exit')">?</button></div>
+  <div class="guide-panel" id="g-exit">
+    <div class="guide-title">Stop loss, take profit &amp; position sizing</div>
+    <div class="guide-def">Exit rules are defined before entry — never after. The stop loss defines your risk. Position size is calculated from your risk tolerance, not from how much you want to make.</div>
+    <div class="guide-look-title">What to look for</div>
+    <div class="guide-look">
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Stop loss — place 50–75 pips beyond the S&R level on the other side.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Target 1 — close 50% of position at 1:2 risk/reward. Locks in profit regardless of what the remainder does.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bull"></div><div>Target 2 — run the remainder to the next major S&R level. Move stop to breakeven once Target 1 is hit.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-warn"></div><div>Time stop — if no directional move within 30 minutes of entry candle close, reassess and consider exiting.</div></div>
+      <div class="guide-row"><div class="guide-dot dot-bear"></div><div>Never risk more than 1–2% of account equity on a single trade.</div></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="field"><label>Stop loss distance (pips)</label><input type="number" id="slPips" placeholder="e.g. 60" min="1" max="500"/></div>
+    <div class="field"><label>Account risk (%)</label><select id="riskPct"><option value="1">1%</option><option value="1.5">1.5%</option><option value="2">2%</option></select></div>
+    <div class="field"><label>Correlated pair open?</label><select id="correlation"><option value="no">No</option><option value="yes">Yes — same direction</option><option value="opposite">Yes — opposite direction</option></select></div>
+  </div>
+</div>
+
+<button class="btn-analyse" onclick="analyse()">Analyse my trade setup →</button>
+
+<div id="output" style="margin-top:1.5rem;display:none"></div>
+
+<footer style="margin-top:2.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border)">
+  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:10px;font-weight:600;color:var(--warn);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Disclaimer</div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:6px">Tradable is provided for informational and educational purposes only. Nothing contained in this application constitutes financial advice, investment advice, trading advice, or any other form of advice. The analysis generated by this tool is based on technical indicators and a personal trading framework — it does not take into account your individual financial situation, objectives, or risk tolerance.</p>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7">No guarantee is made as to the accuracy, completeness, or suitability of any information produced by this application. Past performance and indicator signals are not indicative of future results. Trading foreign exchange carries significant risk of loss and may not be suitable for all investors. You should always conduct your own research and seek independent financial advice before making any trading decisions.</p>
+  </div>
+  <p style="font-size:11px;color:var(--text3);text-align:center">&copy; 2026 Christen Carvill. All rights reserved.</p>
+</footer>
+
+</div>
+<script>
+function tog(id){document.getElementById(id).classList.toggle('open')}
+function v(id){return document.getElementById(id).value}
+function analyse(){
+  const ma50=v('ma50'),ma200=v('ma200'),maRel=v('maRelation');
+  const bbWidth=v('bbWidth'),bbPrice=v('bbPrice'),bbSignal=v('bbSignal'),bbMatch=v('bbMatch');
+  const rsiLevel=v('rsiLevel'),rsiDiv=v('rsiDiv');
+  const macdHist=v('macdHist'),macdSig=v('macdSig'),momAgree=v('momentumAgree');
+  const srLoc=v('srLocation'),zone=v('zoneType'),rts=v('rts');
+  const mktType=v('mktType'),fundBias=v('fundBias'),events=v('events'),correlation=v('correlation');
+  const slPips=parseInt(document.getElementById('slPips').value)||0;
+  let score=0,total=13,checks=[],direction='',warnings=[];
+  const trendBull=ma50==='above'&&ma200==='above',trendBear=ma50==='below'&&ma200==='below',trendClear=trendBull||trendBear;
+  if(trendBull)direction='bullish';if(trendBear)direction='bearish';
+  checks.push({l:'Price above/below both MAs',p:trendClear?'pass':ma50===''?'na':'fail',v:trendBull?'Bullish':trendBear?'Bearish':'Conflicting'});if(trendClear)score++;
+  const goldenCross=maRel==='above',deathCross=maRel==='below',crossConfirm=(trendBull&&goldenCross)||(trendBear&&deathCross);
+  checks.push({l:'MA cross alignment',p:crossConfirm?'pass':maRel===''?'na':'warn',v:goldenCross?'Golden cross':deathCross?'Death cross':'Crossing'});if(crossConfirm)score++;
+  const bbOk=bbSignal!==''&&bbSignal!=='none'&&bbSignal!=='squeeze',bbBull=bbSignal==='breakout_bull'||bbSignal==='fade_bull',bbBear=bbSignal==='breakout_bear'||bbSignal==='fade_bear',bbDirMatch=(direction==='bullish'&&bbBull)||(direction==='bearish'&&bbBear);
+  checks.push({l:'Bollinger signal present',p:bbOk?(bbDirMatch?'pass':'warn'):bbSignal==='squeeze'?'warn':'fail',v:bbSignal===''?'—':bbSignal.replace(/_/g,' ')});if(bbOk&&bbDirMatch)score++;
+  if(bbSignal==='squeeze')warnings.push('Bollinger squeeze forming — monitor for breakout direction before entering.');
+  if(bbWidth==='squeezing'||bbWidth==='narrow')warnings.push('Bands narrowing — big move may be imminent. Confirm direction before entry.');
+  if(bbMatch==='no')warnings.push('Bollinger signal does not match identified market type — reassess market classification.');
+  const midRange=bbPrice==='middle'||srLoc==='midrange'||zone==='midrange';
+  if(midRange)warnings.push('Price appears to be mid-range — do not trade. Only enter at hard zone extremes.');
+  const rsiDivOk=rsiDiv==='bullish'||rsiDiv==='bearish',rsiDivMatch=(direction==='bullish'&&rsiDiv==='bullish')||(direction==='bearish'&&rsiDiv==='bearish');
+  checks.push({l:'RSI divergence confirmed',p:rsiDivOk?(rsiDivMatch?'pass':'fail'):'fail',v:rsiDiv===''?'—':rsiDiv});if(rsiDivOk&&rsiDivMatch)score++;
+  if(rsiLevel==='overbought'&&direction==='bullish')warnings.push('RSI overbought in a bullish setup — pullback risk. Wait for RSI to reset.');
+  if(rsiLevel==='oversold'&&direction==='bearish')warnings.push('RSI oversold in a bearish setup — bounce risk. Wait for RSI to reset.');
+  const macdBull=macdHist==='above_growing'||macdHist==='crossing_up'||macdSig==='crossing_up'||macdSig==='above',macdBear=macdHist==='below_growing'||macdHist==='crossing_down'||macdSig==='crossing_down'||macdSig==='below',macdMatch=(direction==='bullish'&&macdBull)||(direction==='bearish'&&macdBear);
+  checks.push({l:'MACD crossover confirmed',p:macdMatch?'pass':macdHist===''?'na':'fail',v:macdHist===''?'—':macdHist.replace(/_/g,' ')});if(macdMatch)score++;
+  const bothMomAgree=momAgree==='yes_bull'||momAgree==='yes_bear',momDirMatch=(direction==='bullish'&&momAgree==='yes_bull')||(direction==='bearish'&&momAgree==='yes_bear');
+  checks.push({l:'RSI + MACD both agree',p:bothMomAgree?(momDirMatch?'pass':'fail'):'fail',v:momAgree===''?'—':momAgree.replace(/_/g,' ')});if(bothMomAgree&&momDirMatch)score++;
+  const atLevel=srLoc==='at_support'||srLoc==='at_resistance',srDirMatch=(direction==='bullish'&&srLoc==='at_support')||(direction==='bearish'&&srLoc==='at_resistance');
+  checks.push({l:'Price at key S&R level',p:atLevel?(srDirMatch?'pass':'warn'):'fail',v:srLoc===''?'—':srLoc.replace(/_/g,' ')});if(atLevel&&srDirMatch)score++;
+  const hardZone=zone==='hard';
+  checks.push({l:'Hard zone confirmed',p:hardZone?'pass':zone===''?'na':'fail',v:zone===''?'—':zone});if(hardZone)score++;
+  if(zone==='soft')warnings.push('Soft zone detected — avoid entry. Wait for hard zone confirmation.');
+  const rtsBonus=rts==='yes';
+  checks.push({l:'Resistance turned support',p:rtsBonus?'pass':rts==='no'?'na':'warn',v:rts===''?'—':rts});if(rtsBonus)score++;
+  const mktOk=mktType!=='',instWarn=mktType==='institutional';
+  checks.push({l:'Market type identified',p:mktOk?(instWarn?'warn':'pass'):'na',v:mktType===''?'—':mktType});if(mktOk&&!instWarn)score++;
+  if(instWarn)warnings.push('Institutional market — do not chase. Wait for natural price return.');
+  if(mktType==='scalper')warnings.push('Scalper market — fade thrusts only. Do not trade with momentum.');
+  const fundOk=fundBias!==''&&fundBias!=='neutral',fundMatch=(direction==='bullish'&&fundBias==='bullish')||(direction==='bearish'&&fundBias==='bearish');
+  checks.push({l:'Fundamentals support direction',p:fundOk?(fundMatch?'pass':'fail'):'warn',v:fundBias===''?'—':fundBias});if(fundOk&&fundMatch)score++;
+  if(events==='major')warnings.push('Major economic event upcoming — reduce position size or stand aside.');
+  const corrOk=correlation==='no'||correlation==='opposite';
+  checks.push({l:'No correlated pair conflict',p:corrOk?'pass':'fail',v:correlation==='yes'?'Conflict!':'Clear'});if(corrOk)score++;
+  if(correlation==='yes')warnings.push('Correlated pair already open in same direction — this doubles your effective risk exposure.');
+  const slOk=slPips>=50&&slPips<=75;
+  checks.push({l:'Stop loss within 50–75 pips',p:slOk?'pass':slPips===0?'na':'warn',v:slPips?slPips+' pips':'—'});if(slOk)score++;
+  if(slPips>75)warnings.push('Stop loss exceeds 75 pips — consider tightening if a closer hard zone exists.');
+  if(slPips>0&&slPips<50)warnings.push('Stop loss under 50 pips on daily chart — may be too tight and subject to noise.');
+  const pct=Math.round((score/total)*100);
+  let rec,rc,rbg,rdet;
+  if(direction===''){rec='Cannot assess';rc='var(--neu)';rbg='var(--bg2)';rdet='Trend direction is unclear. Both MAs must align before any trade can be considered.';}
+  else if(mktType==='institutional'){rec='Stand aside';rc='var(--warn)';rbg='var(--warn-bg)';rdet='Institutional market detected. Do not chase. Wait for natural price return before reassessing.';}
+  else if(zone==='soft'){rec='No trade — soft zone';rc='var(--bear)';rbg='var(--bear-bg)';rdet='Price is in a soft zone. Avoid entry. Wait for hard zone confirmation.';}
+  else if(midRange){rec='No trade — mid-range';rc='var(--bear)';rbg='var(--bear-bg)';rdet='Price is mid-range. Wait for price to reach a hard zone extreme before considering entry.';}
+  else if(pct>=85&&fundMatch&&bothMomAgree&&momDirMatch){rec=direction==='bullish'?'Strong buy signal':'Strong sell signal';rc=direction==='bullish'?'var(--bull)':'var(--bear)';rbg=direction==='bullish'?'var(--bull-bg)':'var(--bear-bg)';rdet='All key conditions align. Confluence confirmed across trend, volatility, momentum, and S&R. Proceed with disciplined position sizing and pre-set stops.';}
+  else if(pct>=65){rec=direction==='bullish'?'Potential buy — wait for confirmation':'Potential sell — wait for confirmation';rc='var(--warn)';rbg='var(--warn-bg)';rdet='Most conditions align but one or more key signals are missing or conflicting. Monitor — do not enter until remaining conditions confirm.';}
+  else if(pct>=40){rec='Setup forming — not yet tradeable';rc='var(--warn)';rbg='var(--warn-bg)';rdet='Some conditions present but significant gaps remain. Reassess on the next daily candle close.';}
+  else{rec='No trade';rc='var(--bear)';rbg='var(--bear-bg)';rdet='Insufficient confluence. Multiple conditions missing or conflicting. Stand aside and wait for a cleaner setup.';}
+  const tp1=slPips?slPips*2+'&nbsp;pips':'—';
+  let html=`<div class="result-card" style="background:${rbg};border-color:${rc}40">
+    <div class="result-label" style="color:${rc}">Recommendation</div>
+    <div class="result-title" style="color:${rc}">${rec}</div>
+    <div class="result-sub">${rdet}</div>
+    <div class="score-wrap">
+      <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Confluence</div><div class="score-num" style="color:${rc}">${pct}%</div></div>
+      <div style="flex:1"><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${rc}"></div></div><div class="score-sub">${score} of ${total} conditions met</div></div>
+    </div>
+    <div class="meta-grid">
+      <div class="meta-card"><div class="meta-label">Direction</div><div class="meta-val">${direction||'unclear'}</div></div>
+      <div class="meta-card"><div class="meta-label">Stop loss</div><div class="meta-val">${slPips?slPips+' pips':'—'}</div></div>
+      <div class="meta-card"><div class="meta-label">Target 1</div><div class="meta-val">${tp1}</div></div>
+      <div class="meta-card"><div class="meta-label">Target 2</div><div class="meta-val">Next S&R</div></div>
+      <div class="meta-card"><div class="meta-label">Market type</div><div class="meta-val">${mktType||'—'}</div></div>
+    </div>
+  </div>`;
+  if(warnings.length){html+=`<div class="warn-section"><div class="warn-title">Warnings (${warnings.length})</div>`;warnings.forEach(w=>{html+=`<div class="warn-item">${w}</div>`});html+=`</div>`;}
+  html+=`<div class="checklist-section"><div class="check-title">Full checklist breakdown</div>`;
+  checks.forEach(c=>{const icon=c.p==='pass'?'✓':c.p==='fail'?'✗':c.p==='warn'?'!':'–';const cls=c.p==='pass'?'c-pass':c.p==='fail'?'c-fail':c.p==='warn'?'c-warn':'c-na';html+=`<div class="check-item"><div class="check-icon ${cls}">${icon}</div><div class="check-label">${c.l}</div><div class="check-val">${c.v}</div></div>`;});
+  html+=`</div>`;
+  const out=document.getElementById('output');out.innerHTML=html;out.style.display='block';out.scrollIntoView({behavior:'smooth'});
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
